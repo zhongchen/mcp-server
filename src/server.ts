@@ -1,5 +1,6 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { setKonnectToken, Tool } from "./tools";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Tool } from "./tools";
+import { setKonnectToken } from "./functions";
 
 export class KonnectMCPServer extends McpServer {
   constructor(tools: Tool[], token: string) {
@@ -9,10 +10,15 @@ export class KonnectMCPServer extends McpServer {
       description: "A MCP server for Konnect",
     });
 
-    setKonnectToken(token)
+    setKonnectToken(token);
     // Register tools
     tools.forEach((tool) => {
-      this.tool(tool.name, tool.description, tool.parameters.shape, tool.execute);
+      this.tool(
+        tool.name,
+        tool.description,
+        tool.parameters.shape,
+        tool.execute
+      );
     });
   }
 }
