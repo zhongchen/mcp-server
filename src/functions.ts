@@ -24,20 +24,32 @@ export const getAuthHeaders = () => {
   };
 };
 
-export async function listControlPlanes(
-  args: z.infer<typeof listControlPlaneParameters>
-) {
-  const params = new URLSearchParams();
-  params.append("page[size]", args.pageSize.toString());
-  params.append("page[number]", args.pageNumber.toString());
-  const url = `https://${
-    args.region
-  }.api.konghq.com/v2/control-planes?${params.toString()}`;
+async function makeKonnectRequest<T>(options: {
+  region: string;
+  path: string;
+  params: URLSearchParams;
+  method?: "get" | "post" | "put" | "delete";
+  errorPrefix: string;
+}): Promise<{
+  content: Array<{ type: "text"; text: string }>;
+}> {
+  const { region, path, params, method = "get", errorPrefix } = options;
+  const url = `https://${region}.api.konghq.com${path}?${params.toString()}`;
 
   try {
-    const response = await axios.get(url, {
-      headers: getAuthHeaders(),
-    });
+    let response;
+    if (method === "get") {
+      response = await axios.get(url, { headers: getAuthHeaders() });
+    } else if (method === "post") {
+      response = await axios.post(url, {}, { headers: getAuthHeaders() });
+    } else if (method === "put") {
+      response = await axios.put(url, {}, { headers: getAuthHeaders() });
+    } else if (method === "delete") {
+      response = await axios.delete(url, { headers: getAuthHeaders() });
+    } else {
+      throw new Error(`Unsupported HTTP method: ${method}`);
+    }
+
     return {
       content: [
         {
@@ -53,55 +65,61 @@ export async function listControlPlanes(
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(
-        `Failed to list control planes: ${
-          error.response?.data?.message || error.message
-        }`
+        `${errorPrefix}: ${error.response?.data?.message || error.message}`
       );
     }
     throw error;
   }
 }
 
+function buildParams(
+  params: Record<string, string | number | boolean>
+): URLSearchParams {
+  const urlParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    urlParams.append(key, String(value));
+  });
+
+  return urlParams;
+}
+
+export async function listControlPlanes(
+  args: z.infer<typeof listControlPlaneParameters>
+) {
+  const queryParams = {
+    "page[size]": args.pageSize,
+    "page[number]": args.pageNumber,
+  };
+
+  const params = buildParams(queryParams);
+
+  return makeKonnectRequest({
+    region: args.region,
+    path: "/v2/control-planes",
+    params,
+    errorPrefix: "Failed to list control planes",
+  });
+}
+
 export async function listServices(
   args: z.infer<typeof listServicesParameters>
 ) {
-  const params = new URLSearchParams();
-  params.append("page[size]", args.pageSize.toString());
-  params.append("page[number]", args.pageNumber.toString());
+  const queryParams: Record<string, string | number | boolean> = {
+    "page[size]": args.pageSize,
+    "page[number]": args.pageNumber,
+  };
+
   if (args.tags) {
-    params.append("tags", args.tags);
+    queryParams.tags = args.tags;
   }
 
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/services?${params.toString}`;
+  const params = buildParams(queryParams);
 
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        accept: "application/json",
-        authorization: `Bearer ${konnectToken}`,
-      },
-    });
-
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-        {
-          type: "text" as const,
-          text: url,
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to list services: ${
-          error.response?.data?.message || error.message
-        }`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/v2/control-planes/${args.controlPlaneId}/core-entities/services`,
+    params,
+    errorPrefix: "Failed to list services",
+  });
 }
