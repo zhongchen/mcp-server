@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { listControlPlanePrompt } from "./prompts";
+import { listControlPlanePrompt, listServicesPrompt } from "./prompts";
 import { listControlPlaneParameters, listServicesParameters } from "./parameters";
 import { listControlPlanes, listServices } from "./functions";
 
@@ -19,7 +19,7 @@ export const tools: Tool[] = [
   },
   {
     name: 'ListServices',
-    description: 'List services for a specific control plane. Optionally filter by tags.',
+    description: listServicesPrompt,
     parameters: listServicesParameters,
     execute: listServices
   },
