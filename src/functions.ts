@@ -2,6 +2,8 @@ import { z } from "zod";
 import {
   listControlPlaneParameters,
   listServicesParameters,
+  searchParameters,
+  searchTypesParameters
 } from "./parameters";
 import axios from "axios";
 
@@ -30,11 +32,12 @@ async function makeKonnectRequest<T>(options: {
   params: URLSearchParams;
   method?: "get" | "post" | "put" | "delete";
   errorPrefix: string;
+  apiVersion?: "v1" | "v2";
 }): Promise<{
   content: Array<{ type: "text"; text: string }>;
 }> {
-  const { region, path, params, method = "get", errorPrefix } = options;
-  const url = `https://${region}.api.konghq.com${path}?${params.toString()}`;
+  const { region, path, params, method = "get", errorPrefix, apiVersion = "v2" } = options;
+  const url = `https://${region}.api.konghq.com/${apiVersion}${path}?${params.toString()}`;
 
   try {
     let response;
@@ -96,7 +99,7 @@ export async function listControlPlanes(
 
   return makeKonnectRequest({
     region: args.region,
-    path: "/v2/control-planes",
+    path: "/control-planes",
     params,
     errorPrefix: "Failed to list control planes",
   });
@@ -118,8 +121,45 @@ export async function listServices(
 
   return makeKonnectRequest({
     region: args.region,
-    path: `/v2/control-planes/${args.controlPlaneId}/core-entities/services`,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/services`,
     params,
     errorPrefix: "Failed to list services",
+  });
+}
+
+export async function search(
+  args: z.infer<typeof searchParameters>
+) {
+  const queryParams: Record<string, string | number | boolean> = {
+    q: args.q,
+    "page[size]": args.pageSize,
+  };
+
+  if (args.pageAfter) {
+    queryParams["page[after]"] = args.pageAfter;
+  }
+
+  const params = buildParams(queryParams);
+
+  return makeKonnectRequest({
+    region: args.region,
+    path: "/search",
+    params,
+    errorPrefix: "Failed to search Konnect",
+    apiVersion: "v1"
+  });
+}
+
+export async function searchTypes(
+  args: z.infer<typeof searchTypesParameters>
+) {
+  const params = new URLSearchParams();
+
+  return makeKonnectRequest({
+    region: args.region,
+    path: "/search/types",
+    params,
+    errorPrefix: "Failed to list search types",
+    apiVersion: "v1"
   });
 }

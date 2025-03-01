@@ -1,7 +1,22 @@
 import { z } from "zod";
-import { listControlPlanePrompt } from "./prompts";
-import { listControlPlaneParameters, listServicesParameters } from "./parameters";
-import { listControlPlanes, listServices } from "./functions";
+import { 
+  listControlPlanePrompt, 
+  listServicesPrompt, 
+  searchPrompt, 
+  searchTypesPrompt 
+} from "./prompts";
+import { 
+  listControlPlaneParameters, 
+  listServicesParameters, 
+  searchParameters, 
+  searchTypesParameters 
+} from "./parameters";
+import { 
+  listControlPlanes, 
+  listServices, 
+  search, 
+  searchTypes 
+} from "./functions";
 
 export interface Tool {
   name: string;
@@ -19,8 +34,20 @@ export const tools: Tool[] = [
   },
   {
     name: 'ListServices',
-    description: 'List services for a specific control plane. Optionally filter by tags.',
+    description: listServicesPrompt,
     parameters: listServicesParameters,
     execute: listServices
   },
+  {
+    name: 'SearchKonnect',
+    description: searchPrompt,
+    parameters: searchParameters,
+    execute: search
+  },
+  {
+    name: 'ListSearchTypes',
+    description: searchTypesPrompt,
+    parameters: searchTypesParameters,
+    execute: searchTypes
+  }
 ];
