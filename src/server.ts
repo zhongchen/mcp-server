@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Tool } from "./tools";
-import { setKonnectToken } from "./functions";
+import { setKonnectToken } from "./shared/api";
 
 export class KonnectMCPServer extends McpServer {
   constructor(tools: Tool[], token: string) {

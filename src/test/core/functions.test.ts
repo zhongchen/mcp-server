@@ -1,16 +1,10 @@
 import axios from 'axios';
 import {
-  setKonnectToken,
-  getAuthHeaders,
   listControlPlanes,
-  listServices,
   search,
   searchTypes
-} from '../functions';
-
-// We need to directly test the functions we want to test
-// without the mocking interference
-jest.unmock('../functions');
+} from '../../core/functions';
+import { setKonnectToken } from '../../shared/api';
 
 // Mock axios
 jest.mock('axios');
@@ -21,19 +15,9 @@ beforeAll(() => {
   setKonnectToken('test-token');
 });
 
-describe('API Functions', () => {
+describe('Core API Functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('getAuthHeaders', () => {
-    it('should return correct headers with token', () => {
-      const headers = getAuthHeaders();
-      expect(headers).toEqual({
-        accept: 'application/json',
-        Authorization: 'Bearer test-token'
-      });
-    });
   });
 
   describe('listControlPlanes', () => {
@@ -51,30 +35,7 @@ describe('API Functions', () => {
       });
       
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        expect.stringContaining('https://us.api.konghq.com'),
-        { headers: expect.any(Object) }
-      );
-    });
-  });
-
-  describe('listServices', () => {
-    it('should call axios with correct parameters', async () => {
-      const mockResponse = {
-        data: { items: [{ id: 'svc-1', name: 'Service 1' }] }
-      };
-      
-      mockedAxios.get.mockResolvedValue(mockResponse);
-      
-      await listServices({
-        controlPlaneId: 'test-cp-id',
-        region: 'eu',
-        pageSize: 20,
-        pageNumber: 2,
-        tags: 'prod,api'
-      });
-      
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        expect.stringContaining('https://eu.api.konghq.com'),
+        expect.stringContaining('https://us.api.konghq.com/v2/control-planes'),
         { headers: expect.any(Object) }
       );
     });
@@ -119,16 +80,5 @@ describe('API Functions', () => {
         { headers: expect.any(Object) }
       );
     });
-  });
-});
-
-// Separate file for error handling tests
-describe('API Error Handling', () => {
-  // This test can be simplified by just checking that our basic API calls work
-  it('should verify that the functions are properly exported', () => {
-    expect(typeof listControlPlanes).toBe('function');
-    expect(typeof listServices).toBe('function');
-    expect(typeof search).toBe('function');
-    expect(typeof searchTypes).toBe('function');
   });
 });
