@@ -1,11 +1,11 @@
 import { KonnectMCPServer } from '../server';
 import { tools } from '../tools';
-import { setKonnectToken } from '../functions';
+import { setKonnectToken } from '../shared/api';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 // Mock the MCP Server from SDK
 jest.mock('@modelcontextprotocol/sdk/server/mcp.js');
-jest.mock('../functions');
+jest.mock('../shared/api');
 
 describe('KonnectMCPServer', () => {
   const mockToken = 'test-token';

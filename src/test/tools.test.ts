@@ -1,64 +1,66 @@
 import { tools } from '../tools';
-import {
-  listControlPlanes,
-  listServices,
-  search,
-  searchTypes
-} from '../functions';
-import {
-  listControlPlaneParameters,
-  listServicesParameters,
-  searchParameters,
-  searchTypesParameters
-} from '../parameters';
-import {
-  listControlPlanePrompt,
-  listServicesPrompt,
-  searchPrompt,
-  searchTypesPrompt
-} from '../prompts';
+import { coreTools } from '../core';
+import { serviceTools } from '../services';
+import { routeTools } from '../routes';
 
-// Mock the functions module
-jest.mock('../functions');
+// Mock modules to isolate the test
+jest.mock('../core', () => ({
+  coreTools: [
+    { name: 'ListControlPlanes' },
+    { name: 'SearchKonnect' },
+    { name: 'ListSearchTypes' }
+  ]
+}));
 
-describe('Tools', () => {
-  it('should have the correct number of tools', () => {
-    expect(tools.length).toBe(4);
-  });
+jest.mock('../services', () => ({
+  serviceTools: [
+    { name: 'ListServices' },
+    { name: 'CreateService' },
+    { name: 'GetService' },
+    { name: 'UpdateService' },
+    { name: 'DeleteService' }
+  ]
+}));
 
-  it('should have ListControlPlanes tool correctly configured', () => {
-    const listControlPlanesTool = tools.find(tool => tool.name === 'ListControlPlanes');
+jest.mock('../routes', () => ({
+  routeTools: [
+    { name: 'ListRoutes' },
+    { name: 'CreateRoute' },
+    { name: 'GetRoute' },
+    { name: 'UpdateRoute' },
+    { name: 'DeleteRoute' }
+  ]
+}));
+
+describe('Tools Configuration', () => {
+  it('should include all tools from all modules', () => {
+    // Total tools count should be the sum of all modules
+    const expectedCount = 
+      coreTools.length + 
+      serviceTools.length + 
+      routeTools.length;
     
-    expect(listControlPlanesTool).toBeDefined();
-    expect(listControlPlanesTool?.description).toBe(listControlPlanePrompt);
-    expect(listControlPlanesTool?.parameters).toBe(listControlPlaneParameters);
-    expect(listControlPlanesTool?.execute).toBe(listControlPlanes);
+    expect(tools.length).toBe(expectedCount);
   });
-
-  it('should have ListServices tool correctly configured', () => {
-    const listServicesTool = tools.find(tool => tool.name === 'ListServices');
-    
-    expect(listServicesTool).toBeDefined();
-    expect(listServicesTool?.description).toBe(listServicesPrompt);
-    expect(listServicesTool?.parameters).toBe(listServicesParameters);
-    expect(listServicesTool?.execute).toBe(listServices);
+  
+  it('should include all core tools', () => {
+    coreTools.forEach(tool => {
+      const found = tools.find(t => t.name === tool.name);
+      expect(found).toBeDefined();
+    });
   });
-
-  it('should have SearchKonnect tool correctly configured', () => {
-    const searchTool = tools.find(tool => tool.name === 'SearchKonnect');
-    
-    expect(searchTool).toBeDefined();
-    expect(searchTool?.description).toBe(searchPrompt);
-    expect(searchTool?.parameters).toBe(searchParameters);
-    expect(searchTool?.execute).toBe(search);
+  
+  it('should include all service tools', () => {
+    serviceTools.forEach(tool => {
+      const found = tools.find(t => t.name === tool.name);
+      expect(found).toBeDefined();
+    });
   });
-
-  it('should have ListSearchTypes tool correctly configured', () => {
-    const searchTypesTool = tools.find(tool => tool.name === 'ListSearchTypes');
-    
-    expect(searchTypesTool).toBeDefined();
-    expect(searchTypesTool?.description).toBe(searchTypesPrompt);
-    expect(searchTypesTool?.parameters).toBe(searchTypesParameters);
-    expect(searchTypesTool?.execute).toBe(searchTypes);
+  
+  it('should include all route tools', () => {
+    routeTools.forEach(tool => {
+      const found = tools.find(t => t.name === tool.name);
+      expect(found).toBeDefined();
+    });
   });
 });

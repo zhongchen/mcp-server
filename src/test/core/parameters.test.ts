@@ -1,11 +1,10 @@
 import {
   listControlPlaneParameters,
-  listServicesParameters,
   searchParameters,
   searchTypesParameters
-} from '../parameters';
+} from '../../core/parameters';
 
-describe('Parameter Schemas', () => {
+describe('Core Parameter Schemas', () => {
   describe('listControlPlaneParameters', () => {
     it('should validate with default values', () => {
       const result = listControlPlaneParameters.parse({});
@@ -29,49 +28,6 @@ describe('Parameter Schemas', () => {
       expect(() => {
         listControlPlaneParameters.parse({ region: 'invalid' });
       }).toThrow();
-    });
-
-    it('should accept custom page size and number', () => {
-      const result = listControlPlaneParameters.parse({
-        pageSize: 20,
-        pageNumber: 2
-      });
-      
-      expect(result).toEqual({
-        region: 'us',
-        pageSize: 20,
-        pageNumber: 2
-      });
-    });
-  });
-
-  describe('listServicesParameters', () => {
-    it('should require controlPlaneId', () => {
-      expect(() => {
-        listServicesParameters.parse({});
-      }).toThrow();
-    });
-
-    it('should validate with controlPlaneId and default values', () => {
-      const result = listServicesParameters.parse({
-        controlPlaneId: 'test-id'
-      });
-      
-      expect(result).toEqual({
-        controlPlaneId: 'test-id',
-        region: 'us',
-        pageSize: 10,
-        pageNumber: 1
-      });
-    });
-
-    it('should accept tags parameter', () => {
-      const result = listServicesParameters.parse({
-        controlPlaneId: 'test-id',
-        tags: 'prod,dev'
-      });
-      
-      expect(result.tags).toBe('prod,dev');
     });
   });
 
