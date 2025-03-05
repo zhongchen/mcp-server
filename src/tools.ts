@@ -4,6 +4,7 @@ import { coreTools } from './core';
 import { serviceTools } from './services';
 import { routeTools } from './routes';
 import { consumerTools } from './consumer';
+import { basicAuthTools } from './basic-auth';
 
 export interface Tool {
   name: string;
@@ -17,5 +18,6 @@ export const tools: Tool[] = [
   ...coreTools,
   ...serviceTools,
   ...routeTools,
-  ...consumerTools
+  ...consumerTools,
+  ...basicAuthTools
 ];
