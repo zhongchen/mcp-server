@@ -6,8 +6,7 @@ import {
   updateRouteParameters,
   deleteRouteParameters
 } from "./parameters";
-import axios from "axios";
-import { getAuthHeaders, makeKonnectRequest, buildParams } from "../shared/api";
+import { makeKonnectRequest, buildParams } from "../shared/api";
 
 export async function listRoutes(
   args: z.infer<typeof routeParameters>
@@ -26,6 +25,7 @@ export async function listRoutes(
   return makeKonnectRequest({
     region: args.region,
     path: `/control-planes/${args.controlPlaneId}/core-entities/routes`,
+    method: 'get',
     params,
     errorPrefix: "Failed to list routes",
   });
@@ -34,27 +34,13 @@ export async function listRoutes(
 export async function createRoute(
   args: z.infer<typeof createRouteParameters>
 ) {
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/routes`;
-  
-  try {
-    const response = await axios.post(url, args.route, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to create route: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/routes`,
+    method: 'post',
+    body: args.route,
+    errorPrefix: "Failed to create route",
+  });
 }
 
 export async function getRoute(
@@ -63,7 +49,7 @@ export async function getRoute(
   return makeKonnectRequest({
     region: args.region,
     path: `/control-planes/${args.controlPlaneId}/core-entities/routes/${args.routeId}`,
-    params: new URLSearchParams(),
+    method: 'get',
     errorPrefix: "Failed to get route",
   });
 }
@@ -71,51 +57,22 @@ export async function getRoute(
 export async function updateRoute(
   args: z.infer<typeof updateRouteParameters>
 ) {
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/routes/${args.routeId}`;
-  
-  try {
-    const response = await axios.put(url, args.route, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to update route: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/routes/${args.routeId}`,
+    method: 'put',
+    body: args.route,
+    errorPrefix: "Failed to update route",
+  });
 }
 
 export async function deleteRoute(
   args: z.infer<typeof deleteRouteParameters>
 ) {
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/routes/${args.routeId}`;
-  
-  try {
-    const response = await axios.delete(url, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.status === 204 ? { success: true } : response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to delete route: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/routes/${args.routeId}`,
+    method: 'delete',
+    errorPrefix: "Failed to delete route",
+  });
 }

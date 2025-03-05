@@ -1,5 +1,4 @@
 import { z } from "zod";
-import axios from "axios";
 import {
   listBasicAuthParameters,
   createBasicAuthParameters,
@@ -29,6 +28,7 @@ export async function listBasicAuth(
   return makeKonnectRequest({
     region: args.region,
     path,
+    method: 'get',
     params,
     errorPrefix: "Failed to list basic-auth credentials",
   });
@@ -37,44 +37,30 @@ export async function listBasicAuth(
 export async function createBasicAuth(
   args: z.infer<typeof createBasicAuthParameters>
 ) {
-  const consumerPath = args.consumerId 
+  const path = args.consumerId 
     ? `/control-planes/${args.controlPlaneId}/core-entities/consumers/${args.consumerId}/basic-auth`
     : `/control-planes/${args.controlPlaneId}/core-entities/basic-auths`;
 
-  const url = `https://${args.region}.api.konghq.com/v2${consumerPath}`;
-  
-  try {
-    const response = await axios.post(url, args.basicAuth, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to create basic-auth credential: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path,
+    method: 'post',
+    body: args.basicAuth,
+    errorPrefix: "Failed to create basic-auth credential",
+  });
 }
 
 export async function getBasicAuth(
   args: z.infer<typeof getBasicAuthParameters>
 ) {
-  const consumerPath = args.consumerId 
+  const path = args.consumerId 
     ? `/control-planes/${args.controlPlaneId}/core-entities/consumers/${args.consumerId}/basic-auth/${args.basicAuthId}`
     : `/control-planes/${args.controlPlaneId}/core-entities/basic-auths/${args.basicAuthId}`;
 
   return makeKonnectRequest({
     region: args.region,
-    path: consumerPath,
-    params: new URLSearchParams(),
+    path,
+    method: 'get',
     errorPrefix: "Failed to get basic-auth credential",
   });
 }
@@ -82,59 +68,30 @@ export async function getBasicAuth(
 export async function updateBasicAuth(
   args: z.infer<typeof updateBasicAuthParameters>
 ) {
-  const consumerPath = args.consumerId 
+  const path = args.consumerId 
     ? `/control-planes/${args.controlPlaneId}/core-entities/consumers/${args.consumerId}/basic-auth/${args.basicAuthId}`
     : `/control-planes/${args.controlPlaneId}/core-entities/basic-auths/${args.basicAuthId}`;
 
-  const url = `https://${args.region}.api.konghq.com/v2${consumerPath}`;
-  
-  try {
-    const response = await axios.put(url, args.basicAuth, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to update basic-auth credential: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path,
+    method: 'put',
+    body: args.basicAuth,
+    errorPrefix: "Failed to update basic-auth credential",
+  });
 }
 
 export async function deleteBasicAuth(
   args: z.infer<typeof deleteBasicAuthParameters>
 ) {
-  const consumerPath = args.consumerId 
+  const path = args.consumerId 
     ? `/control-planes/${args.controlPlaneId}/core-entities/consumers/${args.consumerId}/basic-auth/${args.basicAuthId}`
     : `/control-planes/${args.controlPlaneId}/core-entities/basic-auths/${args.basicAuthId}`;
 
-  const url = `https://${args.region}.api.konghq.com/v2${consumerPath}`;
-  
-  try {
-    const response = await axios.delete(url, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.status === 204 ? { success: true } : response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to delete basic-auth credential: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path,
+    method: 'delete',
+    errorPrefix: "Failed to delete basic-auth credential",
+  });
 }
