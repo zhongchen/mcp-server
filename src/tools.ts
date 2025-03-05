@@ -3,6 +3,7 @@ import { z } from "zod";
 import { coreTools } from './core';
 import { serviceTools } from './services';
 import { routeTools } from './routes';
+import { consumerTools } from './consumer';
 
 export interface Tool {
   name: string;
@@ -15,5 +16,6 @@ export interface Tool {
 export const tools: Tool[] = [
   ...coreTools,
   ...serviceTools,
-  ...routeTools
+  ...routeTools,
+  ...consumerTools
 ];
