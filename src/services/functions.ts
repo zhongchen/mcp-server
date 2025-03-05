@@ -6,8 +6,7 @@ import {
   updateServiceParameters,
   deleteServiceParameters
 } from "./parameters";
-import axios from "axios";
-import { getAuthHeaders, makeKonnectRequest, buildParams } from "../shared/api";
+import { makeKonnectRequest, buildParams } from "../shared/api";
 
 export async function listServices(
   args: z.infer<typeof listServicesParameters>
@@ -26,6 +25,7 @@ export async function listServices(
   return makeKonnectRequest({
     region: args.region,
     path: `/control-planes/${args.controlPlaneId}/core-entities/services`,
+    method: 'get',
     params,
     errorPrefix: "Failed to list services",
   });
@@ -34,27 +34,13 @@ export async function listServices(
 export async function createService(
   args: z.infer<typeof createServiceParameters>
 ) {
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/services`;
-  
-  try {
-    const response = await axios.post(url, args.service, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to create service: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/services`,
+    method: 'post',
+    body: args.service,
+    errorPrefix: "Failed to create service",
+  });
 }
 
 export async function getService(
@@ -63,7 +49,7 @@ export async function getService(
   return makeKonnectRequest({
     region: args.region,
     path: `/control-planes/${args.controlPlaneId}/core-entities/services/${args.serviceId}`,
-    params: new URLSearchParams(),
+    method: 'get',
     errorPrefix: "Failed to get service",
   });
 }
@@ -71,51 +57,22 @@ export async function getService(
 export async function updateService(
   args: z.infer<typeof updateServiceParameters>
 ) {
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/services/${args.serviceId}`;
-  
-  try {
-    const response = await axios.put(url, args.service, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to update service: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/services/${args.serviceId}`,
+    method: 'put',
+    body: args.service,
+    errorPrefix: "Failed to update service",
+  });
 }
 
 export async function deleteService(
   args: z.infer<typeof deleteServiceParameters>
 ) {
-  const url = `https://${args.region}.api.konghq.com/v2/control-planes/${args.controlPlaneId}/core-entities/services/${args.serviceId}`;
-  
-  try {
-    const response = await axios.delete(url, { headers: getAuthHeaders() });
-    
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: JSON.stringify(response.status === 204 ? { success: true } : response.data),
-        },
-      ],
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      throw new Error(
-        `Failed to delete service: ${error.response?.data?.message || error.message}`
-      );
-    }
-    throw error;
-  }
+  return makeKonnectRequest({
+    region: args.region,
+    path: `/control-planes/${args.controlPlaneId}/core-entities/services/${args.serviceId}`,
+    method: 'delete',
+    errorPrefix: "Failed to delete service",
+  });
 }

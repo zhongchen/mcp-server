@@ -34,28 +34,49 @@ export function buildParams(
 export async function makeKonnectRequest<T>(options: {
   region: string;
   path: string;
-  params: URLSearchParams;
+  params?: URLSearchParams;
   method?: "get" | "post" | "put" | "delete";
+  body?: any;
   errorPrefix: string;
   apiVersion?: "v1" | "v2";
 }): Promise<{
   content: Array<{ type: "text"; text: string }>;
+  data?: any;
 }> {
-  const { region, path, params, method = "get", errorPrefix, apiVersion = "v2" } = options;
+  const { 
+    region, 
+    path, 
+    params = new URLSearchParams(), 
+    method = "get", 
+    body, 
+    errorPrefix, 
+    apiVersion = "v2" 
+  } = options;
+  
   const url = `https://${region}.api.konghq.com/${apiVersion}${path}?${params.toString()}`;
 
   try {
     let response;
-    if (method === "get") {
-      response = await axios.get(url, { headers: getAuthHeaders() });
-    } else if (method === "post") {
-      response = await axios.post(url, {}, { headers: getAuthHeaders() });
-    } else if (method === "put") {
-      response = await axios.put(url, {}, { headers: getAuthHeaders() });
-    } else if (method === "delete") {
-      response = await axios.delete(url, { headers: getAuthHeaders() });
-    } else {
-      throw new Error(`Unsupported HTTP method: ${method}`);
+    const headers = getAuthHeaders();
+
+    switch (method) {
+      case "get":
+        response = await axios.get(url, { headers });
+        break;
+      case "post":
+        response = await axios.post(url, body, { headers });
+        break;
+      case "put":
+        response = await axios.put(url, body, { headers });
+        break;
+      case "delete":
+        response = await axios.delete(url, { 
+          headers, 
+          data: body  // Allow optional body for delete requests
+        });
+        break;
+      default:
+        throw new Error(`Unsupported HTTP method: ${method}`);
     }
 
     return {
@@ -69,6 +90,7 @@ export async function makeKonnectRequest<T>(options: {
           text: url,
         },
       ],
+      data: response.data
     };
   } catch (error) {
     if (axios.isAxiosError(error)) {
